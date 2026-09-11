@@ -1,0 +1,157 @@
+CREATE DATABASE IF NOT EXISTS online_management_system;
+USE online_management_system;
+
+CREATE TABLE student (
+    student_id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    phone VARCHAR(15) UNIQUE,
+    address VARCHAR(200)
+);
+
+CREATE TABLE trainer (
+    trainer_id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    phone VARCHAR(15) UNIQUE,
+    specialization VARCHAR(100) NOT NULL
+);
+
+CREATE TABLE course (
+    course_id INT PRIMARY KEY AUTO_INCREMENT,
+    course_name VARCHAR(100) NOT NULL,
+    description VARCHAR(500),
+    duration INT NOT NULL,
+    fee DECIMAL(10,2) NOT NULL,
+    trainer_id INT NOT NULL,
+    CONSTRAINT chk_course_duration CHECK (duration > 0),
+    CONSTRAINT chk_course_fee CHECK (fee >= 0),
+    CONSTRAINT fk_course_trainer FOREIGN KEY (trainer_id) REFERENCES trainer(trainer_id)
+);
+
+CREATE TABLE enrollment (
+    enrollment_id INT PRIMARY KEY AUTO_INCREMENT,
+    student_id INT NOT NULL,
+    course_id INT NOT NULL,
+    enrollment_date DATE DEFAULT (CURRENT_DATE),
+    status VARCHAR(20) DEFAULT 'Active',
+    CONSTRAINT chk_enrollment_status CHECK (status IN ('Active','Completed','Cancelled')),
+    CONSTRAINT fk_enrollment_student FOREIGN KEY (student_id) REFERENCES student(student_id),
+    CONSTRAINT fk_enrollment_course FOREIGN KEY (course_id) REFERENCES course(course_id),
+    CONSTRAINT uq_student_course UNIQUE (student_id, course_id)
+);
+
+CREATE TABLE certificate (
+    certificate_id INT PRIMARY KEY AUTO_INCREMENT,
+    student_id INT NOT NULL,
+    course_id INT NOT NULL,
+    issue_date DATE DEFAULT (CURRENT_DATE),
+    certificate_number VARCHAR(50) UNIQUE NOT NULL,
+    CONSTRAINT fk_certificate_student FOREIGN KEY (student_id) REFERENCES student(student_id),
+    CONSTRAINT fk_certificate_course FOREIGN KEY (course_id) REFERENCES course(course_id)
+);
+
+CREATE TABLE payment (
+    payment_id INT PRIMARY KEY AUTO_INCREMENT,
+    enrollment_id INT NOT NULL,
+    amount DECIMAL(10,2) NOT NULL,
+    payment_date DATE DEFAULT (CURRENT_DATE),
+    payment_method VARCHAR(30) NOT NULL,
+    payment_status VARCHAR(20) DEFAULT 'Pending',
+    CONSTRAINT chk_payment_amount CHECK (amount > 0),
+    CONSTRAINT chk_payment_method CHECK (payment_method IN ('UPI','Card','Net Banking','Cash')),
+    CONSTRAINT chk_payment_status CHECK (payment_status IN ('Pending','Completed','Failed','Refunded')),
+    CONSTRAINT fk_payment_enrollment FOREIGN KEY (enrollment_id) REFERENCES enrollment(enrollment_id)
+);
+
+INSERT INTO student (name,email,phone,address) VALUES
+('Prudhvi Raj','prudvi@gmail.com','9876543210','Vijayawada'),
+('Rahul Kumar','rahul@gmail.com','9876543211','Hyderabad'),
+('Sneha Reddy','sneha@gmail.com','9876543212','Guntur'),
+('Arjun Rao','arjun@gmail.com','9876543213','Chennai'),
+('Divya Sharma','divya@gmail.com','9876543214','Bangalore');
+
+INSERT INTO trainer (name,email,phone,specialization) VALUES
+('Rajesh Kumar','rajesh@gmail.com','9000000001','SQL'),
+('Priya Sharma','priya@gmail.com','9000000002','Python'),
+('Kiran Reddy','kiran@gmail.com','9000000003','Web Development');
+
+INSERT INTO course (course_name,description,duration,fee,trainer_id) VALUES
+('MySQL Database','Learn SQL and Database Management',45,5000,1),
+('Python Programming','Learn Python from Basics',60,7000,2),
+('Web Development','HTML CSS JavaScript',90,10000,3),
+('Advanced SQL','Advanced SQL Queries and Concepts',50,6000,1);
+
+INSERT INTO enrollment (student_id,course_id,status) VALUES
+(1,1,'Active'),
+(2,1,'Completed'),
+(3,2,'Active'),
+(4,3,'Active'),
+(5,4,'Completed');
+
+INSERT INTO certificate (student_id,course_id,certificate_number) VALUES
+(2,1,'CERT001'),
+(5,4,'CERT002');
+
+INSERT INTO payment (enrollment_id,amount,payment_method,payment_status) VALUES
+(1,5000,'UPI','Completed'),
+(2,5000,'Card','Completed'),
+(3,7000,'Net Banking','Completed'),
+(4,10000,'UPI','Pending'),
+(5,6000,'Card','Completed');
+
+SHOW TABLES;
+
+SELECT * FROM student;
+SELECT * FROM trainer;
+SELECT * FROM course;
+SELECT * FROM enrollment;
+SELECT * FROM certificate;
+SELECT * FROM payment;
+
+SELECT s.student_id, s.name AS student_name, c.course_name,
+       e.enrollment_date, e.status
+FROM student s
+JOIN enrollment e ON s.student_id=e.student_id
+JOIN course c ON e.course_id=c.course_id;
+
+SELECT c.course_name, t.name AS trainer_name, t.specialization
+FROM course c
+JOIN trainer t ON c.trainer_id=t.trainer_id;
+
+SELECT e.enrollment_id, s.name AS student_name, c.course_name,
+       p.amount, p.payment_method, p.payment_status
+FROM enrollment e
+JOIN student s ON e.student_id=s.student_id
+JOIN course c ON e.course_id=c.course_id
+JOIN payment p ON e.enrollment_id=p.enrollment_id;
+
+SELECT course_name, fee
+FROM course
+WHERE fee > (SELECT AVG(fee) FROM course);
+
+DROP VIEW IF EXISTS student_course_details;
+CREATE VIEW student_course_details AS
+SELECT s.student_id, s.name AS student_name, c.course_name,
+       t.name AS trainer_name, e.enrollment_date, e.status
+FROM student s
+JOIN enrollment e ON s.student_id=e.student_id
+JOIN course c ON e.course_id=c.course_id
+JOIN trainer t ON c.trainer_id=t.trainer_id;
+
+SELECT * FROM student_course_details;
+
+DROP PROCEDURE IF EXISTS get_student_courses;
+DELIMITER $$
+CREATE PROCEDURE get_student_courses(IN p_student_id INT)
+BEGIN
+    SELECT s.name AS student_name, c.course_name,
+           e.enrollment_date, e.status
+    FROM student s
+    JOIN enrollment e ON s.student_id=e.student_id
+    JOIN course c ON e.course_id=c.course_id
+    WHERE s.student_id=p_student_id;
+END $$
+DELIMITER ;
+
+CALL get_student_courses(1);
