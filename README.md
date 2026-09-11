@@ -92,4 +92,146 @@ Team Project
 
 📄 License
 
+
 This project is created for educational and learning purposes.
+
+ ER DIAGRAM
+
+WhatsApp Image 2026-09-04 at 12 18 33 PM (1)
+
+# Online Course Management System
+Project Description
+
+The Online Course Management System is a database management project designed to manage students, courses, trainers, enrollments, payments, and certificates.
+
+The system stores and organizes information about students and their course enrollments. It also maintains course details, trainer information, payment records, and certificates in a structured relational database.
+
+Objectives
+
+To maintain student information efficiently.
+To manage course details.
+To manage trainer information.
+To manage student course enrollments.
+To maintain payment information.
+To manage certificates issued to students.
+To establish relationships between different entities using a relational database.
+Technologies Used
+
+MySQL
+SQL
+GitHub
+Main Entities
+
+The Online Course Management System contains the following entities:
+
+Student
+Course
+Trainer
+Enrollment
+Payment
+Certificate
+Entity Description
+
+Student
+
+Stores student personal and contact information.
+
+Attributes:
+
+Student_ID (Primary Key)
+Name
+Email
+Phone
+Address
+Course
+
+Stores information about the courses offered in the system.
+
+Attributes:
+
+Course_ID (Primary Key)
+Course_Name
+Description
+Duration
+Fee
+Trainer_ID (Foreign Key)
+Trainer
+
+Stores information about trainers who conduct courses.
+
+Attributes:
+
+Trainer_ID (Primary Key)
+Name
+Email
+Phone
+Specialization
+Enrollment
+
+Stores information about students enrolled in courses.
+
+Attributes:
+
+Enrollment_ID (Primary Key)
+Student_ID (Foreign Key)
+Course_ID (Foreign Key)
+Enrollment_Date
+Status
+Payment
+
+Stores payment details related to course enrollments.
+
+Attributes:
+
+Payment_ID (Primary Key)
+Enrollment_ID (Foreign Key)
+Amount
+Payment_Date
+Payment_Method
+Payment_Status
+Certificate
+
+Stores certificate information issued to students for courses.
+
+Attributes:
+
+Certificate_ID (Primary Key)
+Student_ID (Foreign Key)
+Course_ID (Foreign Key)
+Issue_Date
+Certificate_Number
+Relationships
+
+One student can have many enrollments.
+One course can have many enrollments.
+One trainer can conduct many courses.
+One enrollment can have multiple payment records.
+One student can have multiple certificates.
+One course can have multiple certificates.
+ER Diagram
+
+The Entity Relationship Diagram represents the entities, attributes, primary keys, foreign keys, and relationships of the Online Course Management System.
+
+![Online course management system];
+
+Key Features
+
+Student information management
+Course information management
+Trainer information management
+Student enrollment management
+Payment record management
+Certificate management
+Primary key and foreign key relationships
+Structured relational database design
+Database Design
+
+The system follows relational database concepts. Primary keys are used to uniquely identify records, while foreign keys are used to establish relationships between related tables.
+
+Project Outcome
+
+This project demonstrates the design and management of an Online Course Management System using SQL and MySQL. It provides a structured way to manage students, courses, trainers, enrollments, payments, and certificates.
+
+Repository
+
+The project is maintained using GitHub for version control, project files, and documentation.
